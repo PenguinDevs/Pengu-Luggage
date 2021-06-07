@@ -1,6 +1,11 @@
+-- [ORIGINAL]
 -- Sentry.io integration for remote error monitoring
 -- Automatically logs errors, warnings, and prints
 -- @author Validark
+
+-- [FORKED]
+-- Handled posting to sentry inside a promise
+-- @author PenguinDevs
 
 -- Types of Console Outputs to automatically Post to Sentry
 local AutoSendTypes = {
@@ -16,6 +21,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- RoStrap Core
 local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
+local Promise = Resources:LoadLibrary("Promise")
 
 if not RunService:IsStudio() then
 	local Sentry = Resources:LoadLibrary("Sentry")
@@ -35,7 +41,23 @@ if not RunService:IsStudio() then
 				Traceback = table.concat(t, "\n")
 			end
 
-			Sentry:Post(Message, Traceback or debug.traceback(), MessageType)
+			local promise = Promise.new(function(resolve, reject)
+				local s, m = pcall(function()
+					Sentry:Post(Message, Traceback or debug.traceback(), MessageType)
+				end)
+				local body = Traceback .. " " .. MessageType
+				if s then
+					resolve(body)
+				else
+					reject(m, body)
+				end
+			end)
+			promise:andThen(function(body)
+				print(string.format("Log sent: %s", body))
+			end)
+			promise:catch(function(err, body)
+				warn(string.format("Log failed to send: %s || Tried sending: %s", err, body))
+			end)
 		end
 	end)
 end
