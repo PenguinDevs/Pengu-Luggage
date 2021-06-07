@@ -109,26 +109,9 @@ local function Post(self, Message, Traceback, MessageType, Logger)
 
 	Traceback = (Traceback or debug.traceback()):gsub("([\r\n])[^\r\n]+upvalue Error[\r\n]", "%1", 1)
 	
-	-- for Line in Traceback:gmatch("[^\n\r]+") do
-	-- 	if Line ~= "Stack Begin" and Line ~= "Stack End" then
-	-- 		local Path, LineNum, Value = Line:match("^Script '(.-)', Line (%d+)%s?%-?%s?(.*)$")
-	-- 		if Path and LineNum and Value then
-	-- 			Count = Count + 1
-	-- 			StackTrace[Count] = {
-	-- 				["filename"] = Path;
-	-- 				["function"] = Value;
-	-- 				["lineno"] = LineNum;
-	-- 			}
-	-- 		else
-	-- 			Count = 0
-	-- 			break
-	-- 		end
-	-- 	end
-	-- end
-
 	for Line in Traceback:gmatch("[^\n\r]+") do
 		if Line ~= "Stack Begin" and Line ~= "Stack End" then
-			local Path, LineNum, Value = Line:match("^(.-):(%d+)%s?(.*)$")
+			local Path, LineNum, Value = Line:match("^Script '(.-)', Line (%d+)%s?%-?%s?(.*)$")
 			if Path and LineNum and Value then
 				Count = Count + 1
 				StackTrace[Count] = {
