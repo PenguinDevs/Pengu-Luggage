@@ -19,8 +19,6 @@ local LogService = game:GetService("LogService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local DEB = false
-
 -- RoStrap Core
 local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
 local Promise = Resources:LoadLibrary("Promise")
@@ -30,9 +28,6 @@ if RunService:IsStudio() then
 
 	-- Connection
 	LogService.MessageOut:Connect(function(Message, MessageType)
-		-- if DEB then return end
-		-- DEB = true
-		-- print(Message, MessageType, AutoSendTypes[MessageType])
 		if AutoSendTypes[MessageType] then
 			local Traceback
 			if MessageType == Enum.MessageType.MessageError then
