@@ -144,6 +144,25 @@ local function Post(self, Message, Traceback, MessageType, Logger)
 	end
 
 	if Count == 0 then
+		for Line in Traceback:gmatch("[^\n\r]+") do
+			if Line ~= "Stack Begin" and Line ~= "Stack End" then
+				local Path, LineNum, Value = Line:match("^Script '(.-)', Line (%d+)%s?%-?%s?(.*)$")
+				if Path and LineNum and Value then
+					Count = Count + 1
+					StackTrace[Count] = {
+						["filename"] = Path;
+						["function"] = Value;
+						["lineno"] = LineNum;
+					}
+				else
+					Count = 0
+					break
+				end
+			end
+		end
+	end
+
+	if Count == 0 then
 		warn("[Sentry] Failed to convert string traceback to stacktrace: invalid traceback:", Traceback)
 	else
 		Packet.culprit = StackTrace[1].filename
