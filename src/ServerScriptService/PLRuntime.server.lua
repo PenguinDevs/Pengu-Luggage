@@ -6,5 +6,3 @@ local ServerInitMods = Resources:LoadLibrary("ServerInitMods")
 local LoadPriorities = Resources:LoadLibrary("LoadPriorities")
 
 LoadPriorities(ServerInitMods)
-
-error("blah")
