@@ -9,7 +9,7 @@
 
 -- Types of Console Outputs to automatically Post to Sentry
 local AutoSendTypes = {
-	[Enum.MessageType.MessageOutput] = true;
+	[Enum.MessageType.MessageOutput] = false;
 	[Enum.MessageType.MessageInfo] = false;
 	[Enum.MessageType.MessageWarning] = true;
 	[Enum.MessageType.MessageError] = true;
@@ -19,15 +19,20 @@ local LogService = game:GetService("LogService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local DEB = false
+
 -- RoStrap Core
 local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
 local Promise = Resources:LoadLibrary("Promise")
 
-if not RunService:IsStudio() then
+if RunService:IsStudio() then
 	local Sentry = Resources:LoadLibrary("Sentry")
 
 	-- Connection
 	LogService.MessageOut:Connect(function(Message, MessageType)
+		-- if DEB then return end
+		-- DEB = true
+		-- print(Message, MessageType, AutoSendTypes[MessageType])
 		if AutoSendTypes[MessageType] then
 			local Traceback
 			if MessageType == Enum.MessageType.MessageError then
@@ -41,21 +46,19 @@ if not RunService:IsStudio() then
 				Traceback = table.concat(t, "\n")
 			end
 
-			local promise = Promise.new(function(resolve, reject)
+			Promise.new(function(resolve, reject)
 				local s, m = pcall(function()
 					Sentry:Post(Message, Traceback or debug.traceback(), MessageType)
 				end)
-				local body = Traceback .. " " .. MessageType
+				local body = Message .. " " .. tostring(MessageType)
 				if s then
 					resolve(body)
 				else
 					reject(m, body)
 				end
-			end)
-			promise:andThen(function(body)
+			end):andThen(function(body)
 				print(string.format("Log sent: %s", body))
-			end)
-			promise:catch(function(err, body)
+			end):catch(function(err, body)
 				warn(string.format("Log failed to send: %s || Tried sending: %s", err, body))
 			end)
 		end
