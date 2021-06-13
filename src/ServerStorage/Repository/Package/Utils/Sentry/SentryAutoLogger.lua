@@ -23,7 +23,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
 local Promise = Resources:LoadLibrary("Promise")
 
-if RunService:IsStudio() then
+if not RunService:IsStudio() then
 	local Sentry = Resources:LoadLibrary("Sentry")
 
 	-- Connection
