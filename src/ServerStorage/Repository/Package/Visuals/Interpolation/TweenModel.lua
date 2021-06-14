@@ -20,6 +20,8 @@ function module:tweenModel(model, CF, tweenInfo)
 		tween:Destroy()
 		tween = nil
 	end)
+
+	tween:Play()
 	
 	return tween
 end
