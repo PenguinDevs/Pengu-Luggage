@@ -11,6 +11,10 @@ local PlayerInitMods = require(script.InitMods)
 local Signal = Resources:LoadLibrary("Signal")
 local Promise = Resources:LoadLibrary("Promise")
 
+local RetPlayerSig = Signal.new()
+
+local collectedPlayers = {}
+
 function player.new(playerObj)
     local self = setmetatable({}, player)
 
@@ -19,6 +23,8 @@ function player.new(playerObj)
     self.player = playerObj
     self.id = self.player.UserId
     self.name = self.player.Name
+
+    collectedPlayers[self.player] = self
 
     self.joinedTime = os.time()
     self.joinedTick = os.clock()
@@ -34,6 +40,10 @@ function player.new(playerObj)
         self:Destroy()
     end)
 
+    self.janitor:Add(function()
+        collectedPlayers[self.player] = nil
+    end)
+
     Promise.new(function(...)
         self:retrieveMods(...)
     end):andThen(function()
@@ -42,6 +52,8 @@ function player.new(playerObj)
     end):catch(function(err)
         self.playerObj:Kick(string.format("FATAL ERROR || SERVER PLAYER INIT || RETRIEVE MODS || %s", err))
     end)
+
+    RetPlayerSig:Fire()
     
     return self
 end
@@ -55,14 +67,37 @@ function player:retrieveMods(resolve, reject)
     end
 end
 
+function player:Destroy()
+    -- print("destroying", self, self.janitor, Janitor.new(), getmetatable(self.janitor), getmetatable(Janitor.new()))
+    self.janitor:Cleanup()
+end
+
 function module:init()
     PlayerService.PlayerAdded:Connect(player.new)
     for _, playerObj in pairs(PlayerService:GetPlayers()) do player.new(playerObj) end
 end
 
-function player:Destroy()
-    -- print("destroying", self, self.janitor, Janitor.new(), getmetatable(self.janitor), getmetatable(Janitor.new()))
-    self.janitor:Cleanup()
+function module:get(player)
+    local PlayerProfile = collectedPlayers[player]
+
+    local MAX_RETRIES = 10
+    local DELAY = 2
+
+    Promise.retry(function()
+        return Promise.new(function(resolve, reject)
+            if PlayerProfile then
+                resolve(PlayerProfile)
+            else
+                wait(DELAY)
+                reject()
+            end
+        end)
+    end, MAX_RETRIES)
+    :catch(function()
+        
+    end):andThen(function(PlayerProfile)
+        
+    end)
 end
 
 return module
