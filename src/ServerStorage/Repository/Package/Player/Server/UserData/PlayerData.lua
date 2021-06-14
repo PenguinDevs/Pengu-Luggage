@@ -24,11 +24,21 @@ function module.playerProfileAssign(PlayerProfile)
     PlayerProfile.janitor:Add(self.retrievedSig, "Destroy", "retrievedSig")
 
     function self:set(valType, newVal)
-        
+        self.profile.Data[valType] = newVal
     end
 
     function self:incr(valType, newVal)
-        
+        local retVal = self.profile.Data[valType]
+
+        if typeof(retVal) == "number" then
+            if typeof(newVal) == "number" then
+                self.profile.Data[valType] += newVal
+            else
+                error(string.format("%s is not a number", newVal))
+            end
+        else
+            error(string.format("%s is not a number, currently %s %s", valType, typeof(newVal), newVal))
+        end
     end
 
     function self:get(reqValType)
