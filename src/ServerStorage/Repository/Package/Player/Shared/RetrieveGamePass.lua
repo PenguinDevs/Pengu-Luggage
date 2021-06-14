@@ -1,3 +1,6 @@
+-- Retrieves whether a user owns gamepasses
+-- @author PenguinDevs
+
 local module = {}
 
 local Resources = require(game.ReplicatedStorage.Resources)
