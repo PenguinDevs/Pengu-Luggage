@@ -78,13 +78,14 @@ function module:init()
 end
 
 function module:get(player)
-    local PlayerProfile = collectedPlayers[player]
+    local PlayerProfile
 
     local MAX_RETRIES = 10
     local DELAY = 2
 
     Promise.retry(function()
         return Promise.new(function(resolve, reject)
+            PlayerProfile = collectedPlayers[player]
             if PlayerProfile then
                 resolve(PlayerProfile)
             else
@@ -93,11 +94,13 @@ function module:get(player)
             end
         end)
     end, MAX_RETRIES)
-    :catch(function()
-        
-    end):andThen(function(PlayerProfile)
-        
+    :catch(function(err)
+        warn(string.format("ERROR WHEN RETRIEVING PLAYER CLASS || %s", err))
+    end):andThen(function(retPlayerProfile)
+        PlayerProfile = retPlayerProfile
     end)
+
+    return PlayerProfile
 end
 
 return module
