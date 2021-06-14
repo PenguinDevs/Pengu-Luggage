@@ -6,6 +6,11 @@ local module = {}
 local Resources = require(game.ReplicatedStorage.Resources)
 local Promise = Resources:LoadLibrary("Promise")
 local DefaultDS = Resources:LoadLibrary("DefaultDS")
+local RetrieveGamePass = Resources:LoadLibrary("RetrieveGamePass")
+
+local PlayersService = game:GetService("Players")
+
+local Player = PlayersService.LocalPlayer
 
 function fetchData()
     local MAX_RETRIES = 10
@@ -37,9 +42,15 @@ function fetchData()
     end):await()
 end
 
+function fetchPasses()
+    module.passes = RetrieveGamePass:retrieveForPlayer(Player.UserId)
+end
+
 function module:init()
+    module.joinedTick = os.clock()
+    module.joinedTime = os.time()
     fetchData()
-    print(module.data)
+    fetchPasses()
 end
 
 return module
