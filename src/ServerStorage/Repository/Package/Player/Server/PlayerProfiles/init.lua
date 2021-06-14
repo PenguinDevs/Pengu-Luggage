@@ -1,3 +1,6 @@
+-- A player class, stores user's data, gamepasses owned as well as modules
+-- @author PenguinDevs
+
 local module = {}
 
 local player = {}
