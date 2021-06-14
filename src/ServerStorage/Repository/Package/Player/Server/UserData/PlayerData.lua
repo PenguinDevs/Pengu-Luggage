@@ -1,3 +1,6 @@
+-- Call get/incr/set on a user's data using ProfileService
+-- @author PenguinDevs
+
 local module = {}
 
 local Resources = require(game.ReplicatedStorage.Resources)
