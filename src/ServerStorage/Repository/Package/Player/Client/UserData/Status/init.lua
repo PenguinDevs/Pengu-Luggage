@@ -34,11 +34,12 @@ function fetchData()
         module.data = dataCollected
     end):catch(function(err)
         warn(string.format("FATAL ERROR || DATA FETCH FAILED || %s", err))
-    end)
+    end):await()
 end
 
 function module:init()
     fetchData()
+    print(module.data)
 end
 
 return module
